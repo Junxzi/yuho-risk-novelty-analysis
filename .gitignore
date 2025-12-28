@@ -1,0 +1,40 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+.vscode/
+data/
+.env
+
+# Notebook scratch / accidental exports
+notebooks/*-checkpoint.ipynb
+notebooks/Untitled*.ipynb
+
+# Large / derived artifacts (reproducible; do not commit)
+outputs/
+*.log
+*.pkl
+*.parquet
+*.feather
+
+# Node / browser automation deps (install via npm, do not commit)
+node_modules/
+
+# OS/editor cruft
+.DS_Store
+
+# Thesis build artifacts / binaries
+thesis.zip
+thesis/**/*.aux
+thesis/**/*.bbl
+thesis/**/*.blg
+thesis/**/*.dvi
+thesis/**/*.fdb_latexmk
+thesis/**/*.fls
+thesis/**/*.log
+thesis/**/*.out
+thesis/**/*.toc
+
+# University format PDF (often copyrighted / not redistributable)
+卒論フォーマット例_参照無し_v1.11.pdf
+thesis/source.pdf
