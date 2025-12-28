@@ -25,6 +25,7 @@ node_modules/
 
 # Thesis build artifacts / binaries
 thesis.zip
+thesis/
 thesis/**/*.aux
 thesis/**/*.bbl
 thesis/**/*.blg
@@ -38,3 +39,8 @@ thesis/**/*.toc
 # University format PDF (often copyrighted / not redistributable)
 卒論フォーマット例_参照無し_v1.11.pdf
 thesis/source.pdf
+
+# Non-repro / personal notes & slide assets (keep repo minimal)
+research/
+slides/
+themes/
