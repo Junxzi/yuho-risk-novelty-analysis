@@ -1,71 +1,51 @@
-## 再現性レポジトリ（日本株：リスク開示の新規性 × 市場反応）
+## Reproducibility Repository (Japan Stocks: Novelty of Risk Disclosures × Market Reaction)
 
-本リポジトリは、卒業研究論文で用いた実証パイプラインを**第三者が追試できる形**でまとめたものです。
+This repository bundles the empirical pipeline used in my undergraduate thesis in a way that allows **third parties to reproduce the results**.
 
-- EDINET 有価証券報告書 → 「事業等のリスク」欄の抽出
-- 埋め込み（sentence-transformers）＋コサイン類似度に基づく **新規性 / 変化度** 指標の構築
-- 提出日をイベント日とするイベントスタディ（異常出来高、CAR、\(\sum \lvert AR \rvert\) 等）
-- 回帰分析と頑健性検証（プレトレンド、偽イベント日プラセボ等）
+- EDINET annual securities reports → extract the “Business Risks” section
+- Build **novelty / change** measures based on embeddings (sentence-transformers) + cosine similarity
+- Event study using the filing date as the event date (abnormal volume, CAR, \(\sum |AR|\), etc.)
+- Regression analysis and robustness checks (pre-trends, placebo event dates, etc.)
 
-### 含まれるもの / 含まれないもの
-- **含まれるもの**：ノートブック、スクリプト、DBスキーマ（`sql/`）、依存関係（`requirements.txt`）。
-- **含まれないもの**：生データや巨大な中間生成物（`.gitignore`参照）。  
-  データの利用条件・容量の都合により、**`data/` と `outputs/` は同梱しません**。
+### Included / Not included
+- **Included**: notebooks, scripts, DB schema (`sql/`), dependencies (`requirements.txt`).
+- **Not included**: raw data or large intermediate artifacts (see `.gitignore`).  
+  Due to data licensing/usage constraints and file sizes, **`data/` and `outputs/` are not included**.
 
-### クイックスタート（DB + Python）
+## Quickstart (DB + Python)
 
-### 動作確認済みPythonバージョン
-- **Python 3.10.18**（ノートブック作成時の環境。再現の際は同系統の 3.10.x を推奨）
+### Verified Python version
+- **Python 3.10.18** (the environment used when creating the notebooks; using Python 3.10.x is recommended for reproduction)
 
-1) **`.env` を作成**
+### 1) Create `.env`
+Create `.env` at the repository root (template: `config/env.example`).
 
-リポジトリ直下に `.env` を作ります（雛形：`config/env.example`）。
+```bash
+cp config/env.example .env
+```
 
-cp config/env.example .env2) **PostgreSQL を起動**
+### 2) Start PostgreSQL
+Start your PostgreSQL instance (e.g., via Docker Compose or your local setup).
 
-2) **PostgreSQL を起動**
+> On first run, tables are created using `sql/001_schema.sql`.
 
-3) **Python 依存関係をインストール**
-
-初回起動時に `sql/001_schema.sql` によりテーブルが作成されます。
-
-3) **Python 依存関係をインストール**
-
+### 3) Install Python dependencies
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt4) **ノートブック実行（推奨順）**
+pip install -r requirements.txt
+```
 
-- `notebooks/02_fetch_yuho.ipynb`：EDINET書類メタデータの登録（`edinet_documents`）
-- `notebooks/03_extract_risk_section.ipynb`：「事業等のリスク」欄の抽出（ローカル保存）
-- `notebooks/04_upsert_risk_section.ipynb`：抽出結果をDBへ反映（`risk_text`）
-- `notebooks/06_fetch_control_variable_elements.ipynb`：統制変数（財務項目）の抽出・登録
-- `notebooks/08_calculate_similarity.ipynb`：類似度・新規性の算出（ペア）
-- `notebooks/09_chunk_change_scores.ipynb`：集約指標（例：`change_topk`）の作成
-- `notebooks/10_event_study_market_model.ipynb` / `11_event_study_uncertainty.ipynb`：イベント窓アウトカム算出
-- `notebooks/14_results_writeup.ipynb`：最終結果（表・図の生成）
+### 4) Run notebooks (recommended order)
+- `notebooks/02_fetch_yuho.ipynb`: Register EDINET document metadata (`edinet_documents`)
+- `notebooks/03_extract_risk_section.ipynb`: Extract the “Business Risks” section (saved locally)
+- `notebooks/04_upsert_risk_section.ipynb`: Upsert extracted text into DB (`risk_text`)
+- `notebooks/06_fetch_control_variable_elements.ipynb`: Extract/register control variables (financial items)
+- `notebooks/08_calculate_similarity.ipynb`: Compute similarity / novelty (pairwise)
+- `notebooks/09_chunk_change_scores.ipynb`: Build aggregated measures (e.g., `change_topk`)
+- `notebooks/10_event_study_market_model.ipynb` / `notebooks/11_event_study_uncertainty.ipynb`: Compute event-window outcomes
+- `notebooks/14_results_writeup.ipynb`: Generate final results (tables/figures)
 
-4) **ノートブック実行（推奨順）**
-
-- `notebooks/02_fetch_yuho.ipynb`：EDINET書類メタデータの登録（`edinet_documents`）
-- `notebooks/03_extract_risk_section.ipynb`：「事業等のリスク」欄の抽出（ローカル保存）
-- `notebooks/04_upsert_risk_section.ipynb`：抽出結果をDBへ反映（`risk_text`）
-- `notebooks/06_fetch_control_variable_elements.ipynb`：統制変数（財務項目）の抽出・登録
-- `notebooks/08_calculate_similarity.ipynb`：類似度・新規性の算出（ペア）
-- `notebooks/09_chunk_change_scores.ipynb`：集約指標（例：`change_topk`）の作成
-- `notebooks/10_event_study_market_model.ipynb` / `11_event_study_uncertainty.ipynb`：イベント窓アウトカム算出
-- `notebooks/14_results_writeup.ipynb`：最終結果（表・図の生成）
-
-### 認証情報・データ入手に関する注意
-- EDINET由来データ、および株価・財務データは取得元の利用条件に従って別途準備してください。
-- J-Quants を用いる場合は `.env` に `JPX_API_KEY` / `JQUANTS_USER` / `JQUANTS_PASS` を設定してください（必要なノートブックのみ）。
-
----
-
-## (Optional) English summary
-
-This repository contains notebooks/scripts to reproduce the thesis pipeline (Japan, EDINET risk disclosures → embedding-based novelty → event-study outcomes → regressions).  
-Raw data and large artifacts are excluded; see `.gitignore`. Please follow the Quickstart section above (Japanese) for setup and notebook execution order.
-
-This repository contains notebooks/scripts to reproduce the thesis pipeline (Japan, EDINET risk disclosures → embedding-based novelty → event-study outcomes → regressions).  
-Raw data and large artifacts are excluded; see `.gitignore`. Please follow the Quickstart section above (Japanese) for setup and notebook execution order.
+### Notes on credentials and data acquisition
+- EDINET-derived data, as well as stock price and financial statement data, must be prepared separately in accordance with each data provider’s terms of use.
+- If you use J-Quants, set `JPX_API_KEY` / `JQUANTS_USER` / `JQUANTS_PASS` in `.env` (only required for relevant notebooks).
